@@ -3,10 +3,10 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id("java")
     id("maven-publish")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.0"
 }
 
-val langVersion: Int = 17
+val langVersion: Int = 21
 
 group = "com.dre.brewery"
 version = "3.2.5-PRERELEASE"
@@ -15,7 +15,7 @@ repositories {
     mavenCentral()
     maven("https://jitpack.io") // GriefPrevention, SlimeFun, PlaceholderAPI
     maven("https://repo.md-5.net/content/groups/public/") // Bungee
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") // Spigot
+    maven("https://papermc.io/repo/repository/maven-public/") // Paper
     maven("https://nexus.hc.to/content/repositories/pub_releases") // Vault
     maven("https://maven.enginehub.org/repo/") // WorldEdit, WorldGuard
     maven("https://ci.ender.zone/plugin/repository/everything/") // LWC Extended
@@ -29,7 +29,7 @@ repositories {
 
 // TODO: Figure out exclusions because this is a mess.
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
 
     compileOnly("net.milkbowl.vault:VaultAPI:1.6")
     compileOnly("com.sk89q:worldguard:6.1") // https://dev.bukkit.org/projects/worldedit/files

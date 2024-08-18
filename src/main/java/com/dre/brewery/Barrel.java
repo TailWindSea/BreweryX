@@ -11,6 +11,8 @@ import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
 import com.dre.brewery.utility.LegacyUtil;
 import com.github.Anon8281.universalScheduler.UniversalRunnable;
+import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A Multi Block Barrel with Inventory
@@ -471,7 +474,10 @@ public class Barrel implements InventoryHolder {
 	 * is this a Small barrel?
 	 */
 	public boolean isSmall() {
-		return LegacyUtil.isSign(spigot.getType());
+		AtomicBoolean type = new AtomicBoolean(false);
+		Bukkit.getRegionScheduler().execute(BreweryPlugin.getInstance(), spigot.getLocation(),
+			() -> type.set(LegacyUtil.isSign(spigot.getType())));
+		return type.get();
 	}
 
 	/**

@@ -122,8 +122,8 @@ public class BCauldron {
 		}
 		if (BConfig.enableCauldronParticles && !BConfig.minimalParticles) {
 			// Few little sparks and lots of water splashes. Offset by 0.2 in x and z
-			block.getWorld().spawnParticle(Particle.SNOWFLAKE, particleLocation,2, 0.2, 0, 0.2);
-			block.getWorld().spawnParticle(Particle.FALLING_WATER, particleLocation, 10, 0.2, 0, 0.2);
+			block.getWorld().spawnParticle(Particle.INSTANT_EFFECT, particleLocation,2, 0.2, 0, 0.2);
+			block.getWorld().spawnParticle(Particle.SPLASH, particleLocation, 10, 0.2, 0, 0.2);
 		}
 	}
 
@@ -290,9 +290,9 @@ public class BCauldron {
 			// how exactly in the client code. 1025 seems to be the best for color brightness and upwards motion
 
 			if (VERSION.isOrLater(MinecraftVersion.V1_21)) {
-				block.getWorld().spawnParticle(Particle.MYCELIUM, getRandParticleLoc(), 0, color);
+				block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, getRandParticleLoc(), 0, color);
 			} else {
-				block.getWorld().spawnParticle(Particle.MYCELIUM, getRandParticleLoc(), 0,
+				block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, getRandParticleLoc(), 0,
 						((double) color.getRed()) / 255.0,
 						((double) color.getGreen()) / 255.0,
 						((double) color.getBlue()) / 255.0,
@@ -306,7 +306,7 @@ public class BCauldron {
 			if (particleRandom.nextFloat() > 0.85) {
 				// Dark pixely smoke cloud at 0.4 random in x and z
 				// 0 count enables direction, send to y = 1 with speed 0.09
-				block.getWorld().spawnParticle(Particle.SMOKE, getRandParticleLoc(), 0, 0, 1, 0, 0.09);
+				block.getWorld().spawnParticle(Particle.LARGE_SMOKE, getRandParticleLoc(), 0, 0, 1, 0, 0.09);
 			}
 			if (particleRandom.nextFloat() > 0.2) {
 				// A Water Splash with 0.2 offset in x and z
@@ -315,7 +315,7 @@ public class BCauldron {
 
 			if (VERSION.isOrLater(MinecraftVersion.V1_13) && particleRandom.nextFloat() > 0.4) {
 				// Two hovering pixely dust clouds, a bit of offset and with DustOptions to give some color and size
-				block.getWorld().spawnParticle(Particle.CRIMSON_SPORE, particleLocation, 2, 0.15, 0.2, 0.15, new Particle.DustOptions(color, 1.5f));
+				block.getWorld().spawnParticle(Particle.DUST, particleLocation, 2, 0.15, 0.2, 0.15, new Particle.DustOptions(color, 1.5f));
 			}
 		}
 	}

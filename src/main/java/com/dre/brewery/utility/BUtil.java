@@ -51,6 +51,7 @@ public class BUtil {
 
 	/**
 	 * Color code a message. Supports HEX colors and default minecraft colors!
+	 *
 	 * @param msg The message to color
 	 * @return The colored message, or null if msg was null
 	 */
@@ -80,11 +81,11 @@ public class BUtil {
 	 * Creates a weighted mix between the two given colours
 	 * <p>where the weight is calculated from the distance of the currentPos to the prev and next
 	 *
-	 * @param prevColor Previous Color
-	 * @param prevPos Position of the Previous Color
+	 * @param prevColor  Previous Color
+	 * @param prevPos    Position of the Previous Color
 	 * @param currentPos Current Position
-	 * @param nextColor Next Color
-	 * @param nextPos Position of the Next Color
+	 * @param nextColor  Next Color
+	 * @param nextPos    Position of the Next Color
 	 * @return Mixed Color
 	 */
 	public static Color weightedMixColor(Color prevColor, int prevPos, int currentPos, Color nextColor, int nextPos) {
@@ -108,8 +109,8 @@ public class BUtil {
 	/**
 	 * Sets the Item in the Players hand, depending on which hand he used and if the hand should be swapped
 	 *
-	 * @param event Interact Event to tell which hand the player used
-	 * @param mat The Material of the new item
+	 * @param event   Interact Event to tell which hand the player used
+	 * @param mat     The Material of the new item
 	 * @param swapped If true, will set the opposite Hand instead of the one he used
 	 */
 	@SuppressWarnings("deprecation")
@@ -157,23 +158,26 @@ public class BUtil {
 	 * @param onlyIfStronger Optionally only overwrite if the new one is stronger, i.e. has higher level or longer duration
 	 */
 	public static void reapplyPotionEffect(Player player, PotionEffect effect, boolean onlyIfStronger) {
-		final PotionEffectType type = effect.getType();
-		if (player.hasPotionEffect(type)) {
-			PotionEffect plEffect;
-			if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
-				plEffect = player.getPotionEffect(type);
-			} else {
-				plEffect = player.getActivePotionEffects().stream().filter(e -> e.getType().equals(type)).findAny().get();
+		Bukkit.getGlobalRegionScheduler().run(BreweryPlugin.getInstance(), t -> {
+			final PotionEffectType type = effect.getType();
+			if (player.hasPotionEffect(type)) {
+				PotionEffect plEffect;
+				if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
+					plEffect = player.getPotionEffect(type);
+				} else {
+					plEffect = player.getActivePotionEffects().stream().filter(e -> e.getType().equals(type)).findAny().get();
+				}
+				if (!onlyIfStronger ||
+					plEffect.getAmplifier() < effect.getAmplifier() ||
+					(plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
+					player.removePotionEffect(type);
+				} else {
+					return;
+				}
 			}
-			if (!onlyIfStronger ||
-				plEffect.getAmplifier() < effect.getAmplifier() ||
-				(plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
-				player.removePotionEffect(type);
-			} else {
-				return;
-			}
-		}
-		effect.apply(player);
+			player.getScheduler().runDelayed(BreweryPlugin.getInstance(), (scheduledTask) ->
+				effect.apply(player), () -> {}, 20L);
+		});
 	}
 
 	/**
@@ -216,7 +220,7 @@ public class BUtil {
 	/**
 	 * Returns the Index of a String from the list that contains this substring
 	 *
-	 * @param list The List in which to search for a substring
+	 * @param list      The List in which to search for a substring
 	 * @param substring Part of the String to search for in each of <tt>list</tt>
 	 */
 	public static int indexOfSubstring(List<String> list, String substring) {
@@ -245,8 +249,8 @@ public class BUtil {
 	/**
 	 * Replaces the Placeholders %player_name% and %quality% in the given input string
 	 *
-	 * @param input The String to replace the placeholders in
-	 * @param player Player Name to replace %player_name%
+	 * @param input   The String to replace the placeholders in
+	 * @param player  Player Name to replace %player_name%
 	 * @param quality Quality to replace %quality%
 	 * @return The String with all placeholders replaced
 	 */
@@ -321,7 +325,7 @@ public class BUtil {
 			}
 			return true;
 
-		} else if (LegacyUtil.isWoodPlanks(type) || LegacyUtil.isWoodStairs(type)){
+		} else if (LegacyUtil.isWoodPlanks(type) || LegacyUtil.isWoodStairs(type)) {
 			Barrel barrel3 = Barrel.getByWood(block);
 			if (barrel3 != null) {
 				if (barrel3.hasPermsDestroy(player, block, reason)) {
@@ -412,7 +416,7 @@ public class BUtil {
 
 		int length;
 		//copy the file content in bytes
-		while ((length = in.read(buffer)) > 0){
+		while ((length = in.read(buffer)) > 0) {
 			out.write(buffer, 0, length);
 		}
 

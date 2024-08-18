@@ -475,8 +475,8 @@ public class Barrel implements InventoryHolder {
 	 */
 	public boolean isSmall() {
 		AtomicBoolean type = new AtomicBoolean(false);
-		Bukkit.getRegionScheduler().execute(BreweryPlugin.getInstance(), spigot.getLocation(),
-			() -> type.set(LegacyUtil.isSign(spigot.getType())));
+		Bukkit.getRegionScheduler().execute(BreweryPlugin.getInstance(), spigot.getLocation(), () ->
+			type.set(LegacyUtil.isSign(spigot.getType())));
 		return type.get();
 	}
 

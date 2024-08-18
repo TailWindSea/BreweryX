@@ -55,10 +55,13 @@ import com.dre.brewery.integration.bstats.Stats;
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -66,9 +69,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.dre.brewery.BCauldron.bcauldrons;
 
 public class BreweryPlugin extends JavaPlugin {
 
@@ -155,10 +161,16 @@ public class BreweryPlugin extends JavaPlugin {
         }
 
 		DataManager.loadMiscData(dataManager.getBreweryMiscData());
-        Barrel.getBarrels().addAll(dataManager.getAllBarrels());
-		BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream().collect(Collectors.toMap(BCauldron::getBlock, Function.identity())));
+		Barrel.getBarrels().addAll(dataManager.getAllBarrels());
+
+		for (BCauldron cauldron : bcauldrons.values()) {
+			Bukkit.getRegionScheduler().execute(BreweryPlugin.getInstance(), cauldron.getBlock().getLocation(), () ->
+				BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream().collect(Collectors.toMap(BCauldron::getBlock, Function.identity()))));
+		}
+
 		BPlayer.getPlayers().putAll(dataManager.getAllPlayers().stream().collect(Collectors.toMap(BPlayer::getUuid, Function.identity())));
 		Wakeup.getWakeups().addAll(dataManager.getAllWakeups());
+
 
 
 		// Setup Metrics
@@ -470,7 +482,7 @@ public class BreweryPlugin extends JavaPlugin {
 			long start = System.currentTimeMillis();
 			BConfig.reloader = null;
             // runs every min to update cooking time
-			Iterator<BCauldron> bCauldronsToRemove = BCauldron.bcauldrons.values().iterator();
+			Iterator<BCauldron> bCauldronsToRemove = bcauldrons.values().iterator();
 			while (bCauldronsToRemove.hasNext()) {
 				// runs every min to update cooking time
 				BCauldron bCauldron = bCauldronsToRemove.next();

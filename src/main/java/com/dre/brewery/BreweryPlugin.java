@@ -113,7 +113,7 @@ public class BreweryPlugin extends JavaPlugin {
 		migrateBreweryDataFolder();
 
 		// Version check
-		log("Minecraft Version: " + minecraftVersion.getVersion());
+		log("Minecraft version&7:&6 " + minecraftVersion.getVersion());
 		if (minecraftVersion == MinecraftVersion.UNKNOWN) {
 			warningLog("This version of Minecraft is not known to Brewery! Please be wary of bugs or other issues that may occur in this version.");
 		}

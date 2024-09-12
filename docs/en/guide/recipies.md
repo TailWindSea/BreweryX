@@ -25,6 +25,13 @@ ColorfulBrew:
     name: '&8Bad brew/Brew/&#ffb424Good brew'
 ```
 
+If you don't want to do names based on brew's quality - just put one name
+
+```yaml
+TestBrew:
+    name: Brew
+```
+
 ***
 
 ## Ingredients: `ingredients`
@@ -44,9 +51,9 @@ Ingredients needed for the brew. Possible values:
 
 - BreweryX custom item name
 
-- ItemsAdder id of item - only with [IAOraxen Plugin](https://www.spigotmc.org/resources/iaoraxenaddon-breweryx-addon.114778/)
+- ItemsAdder id of item (without namespace)
 
-- Oraxen id of item - only with [IAOraxen Plugin](https://www.spigotmc.org/resources/iaoraxenaddon-breweryx-addon.114778/)
+- Oraxen id of item
 
 Format of item is `Item/Amount`
 
@@ -58,6 +65,8 @@ TestBrew:
     ingredients:
         - Apple/10 # You need 10 apples
         - Brewery:ColorfulBrew/2 # You'll need 2 ColorfulBrew brews from BreweryX
+        - ItemsAdder:SomeItem/1
+        - Oraxen:SomeItem/1
         - blue_flowers/2 # You'll need 2 items defined in brewery's CustomItems
 ```
 

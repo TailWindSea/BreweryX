@@ -55,13 +55,10 @@ import com.dre.brewery.integration.bstats.Stats;
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -69,12 +66,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.dre.brewery.BCauldron.bcauldrons;
 
 public class BreweryPlugin extends JavaPlugin {
 
@@ -85,6 +79,7 @@ public class BreweryPlugin extends JavaPlugin {
 	private static BreweryPlugin breweryPlugin;
 	private static MinecraftVersion minecraftVersion;
 	private static DataManager dataManager;
+	private static boolean isFolia = false;
 	public static boolean debug;
 	public static boolean useNBT;
 
@@ -111,11 +106,10 @@ public class BreweryPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		migrateBreweryDataFolder();
-
-		// Version check
-		log("Minecraft version&7:&6 " + minecraftVersion.getVersion());
-		if (minecraftVersion == MinecraftVersion.UNKNOWN) {
-			warningLog("This version of Minecraft is not known to Brewery! Please be wary of bugs or other issues that may occur in this version.");
+		try {
+			Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+			isFolia = true;
+		} catch (ClassNotFoundException ignored) {
 		}
 
 
@@ -152,6 +146,12 @@ public class BreweryPlugin extends JavaPlugin {
 		PluginItem.registerItemLoader(this);
 
 
+		log("Minecraft version&7:&a " + minecraftVersion.getVersion());
+		if (minecraftVersion == MinecraftVersion.UNKNOWN) {
+			warningLog("This version of Minecraft is not known to Brewery! Please be wary of bugs or other issues that may occur in this version.");
+		}
+
+
 		// Load DataManager
         try {
             dataManager = DataManager.createDataManager(BConfig.configuredDataManager);
@@ -161,16 +161,22 @@ public class BreweryPlugin extends JavaPlugin {
         }
 
 		DataManager.loadMiscData(dataManager.getBreweryMiscData());
-		Barrel.getBarrels().addAll(dataManager.getAllBarrels());
+        Barrel.getBarrels().addAll(dataManager.getAllBarrels());
+		// Stream error? - https://gist.github.com/TomLewis/413212bd3df6cb745412475128e01e92w
+		// Apparently there's 2 CraftBlocks trying to be put under the same identifier in the map and it's throwing an err
+		// I'll fix the stream issues in the next version but I have to release this fix ASAP so I'm leaving it like this for now. - Jsinco
 
-		for (BCauldron cauldron : bcauldrons.values()) {
-			Bukkit.getRegionScheduler().execute(BreweryPlugin.getInstance(), cauldron.getBlock().getLocation(), () ->
-				BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream().collect(Collectors.toMap(BCauldron::getBlock, Function.identity()))));
-		}
-
+		/*
+		BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream().collect(Collectors.toMap(BCauldron::getBlock, Function.identity())));
 		BPlayer.getPlayers().putAll(dataManager.getAllPlayers().stream().collect(Collectors.toMap(BPlayer::getUuid, Function.identity())));
+		 */
+		for (BCauldron cauldron : dataManager.getAllCauldrons()) {
+			BCauldron.getBcauldrons().put(cauldron.getBlock(), cauldron);
+		}
+		for (BPlayer player : dataManager.getAllPlayers()) {
+			BPlayer.getPlayers().put(player.getUuid(), player);
+		}
 		Wakeup.getWakeups().addAll(dataManager.getAllWakeups());
-
 
 
 		// Setup Metrics
@@ -214,9 +220,9 @@ public class BreweryPlugin extends JavaPlugin {
 
 				if (UpdateChecker.parseVersion(latestVersion) > UpdateChecker.parseVersion(currentVersion)) {
 					UpdateChecker.setUpdateAvailable(true);
-					UpdateChecker.setLatestVersion(latestVersion);
 					log(languageReader.get("Etc_UpdateAvailable", "v" + currentVersion, "v" + latestVersion));
 				}
+				UpdateChecker.setLatestVersion(latestVersion);
 			});
 		}
 
@@ -225,7 +231,7 @@ public class BreweryPlugin extends JavaPlugin {
 			new PlaceholderAPI().register();
 		}
 
-		log("Using scheduler: " + scheduler.getClass().getSimpleName());
+		log("Using scheduler&7: &a" + scheduler.getClass().getSimpleName());
 		log(this.getDescription().getName() + " enabled!");
 	}
 
@@ -392,6 +398,10 @@ public class BreweryPlugin extends JavaPlugin {
 		return dataManager;
 	}
 
+	public static boolean isFolia() {
+		return isFolia;
+	}
+
 	// Utility
 
 	public void msg(CommandSender sender, String msg) {
@@ -482,7 +492,7 @@ public class BreweryPlugin extends JavaPlugin {
 			long start = System.currentTimeMillis();
 			BConfig.reloader = null;
             // runs every min to update cooking time
-			Iterator<BCauldron> bCauldronsToRemove = bcauldrons.values().iterator();
+			Iterator<BCauldron> bCauldronsToRemove = BCauldron.bcauldrons.values().iterator();
 			while (bCauldronsToRemove.hasNext()) {
 				// runs every min to update cooking time
 				BCauldron bCauldron = bCauldronsToRemove.next();

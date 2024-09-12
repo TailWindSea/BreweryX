@@ -119,14 +119,14 @@ public abstract class DataManager {
         if (save) {
             saveAll(async, () -> {
                 this.closeConnection();
-                plugin.log("DataManager exited.");
+                plugin.log("Closed connection from&7:&a " + this.getClass().getSimpleName());
                 if (callback != null) {
                     callback.run();
                 }
             });
         } else {
             this.closeConnection(); // let databases close their connections
-            plugin.log("DataManager exited.");
+            plugin.log("Closed connection from&7:&a " + this.getClass().getSimpleName());
             if (callback != null) {
                 callback.run();
             }
@@ -144,18 +144,18 @@ public abstract class DataManager {
         if (BData.checkForLegacyData()) {
             long start = System.currentTimeMillis();
             plugin.log("&5Brewery is loading data from a legacy format!");
-            plugin.log("&6Brewery can only load legacy data from worlds that exist. If you're trying to migrate old cauldrons, barrels, etc. And the worlds they're in don't exist, you'll need to migrate manually.");
 
             BData.readData();
             BData.finalizeLegacyDataMigration();
 
             dataManager.saveAll(false);
 
-            plugin.log("&5Finished migrating legacy data! Took&7: &6" + (System.currentTimeMillis() - start) + "&5ms &cJoin our discord if you need assistance&7: &chttps://discord.gg/3FkNaNDnta");
+            plugin.log("&5Finished migrating legacy data! Took&7: &a" + (System.currentTimeMillis() - start) + "ms&5! Join our discord if you need assistance: &ahttps://discord.gg/3FkNaNDnta");
+			plugin.warningLog("BreweryX can only load legacy data from worlds that exist. If you're trying to migrate old cauldrons, barrels, etc. And the worlds they're in don't exist, you'll need to migrate manually.");
         }
 
 
-        plugin.log("DataManager created&7:&6 " + record.type());
+        plugin.log("DataManager created&7:&a " + record.type().getFormattedName());
         return dataManager;
     }
 

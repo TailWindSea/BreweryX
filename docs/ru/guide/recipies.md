@@ -26,6 +26,13 @@
 ```
 Что удивительно - как название так и ID напитка поддерживает русский язык!
 
+Если не хочешь делать вариации названия - поставь одно название
+
+```yaml
+ТестовыйНапиток:
+    name: Напиток
+```
+
 ***
 
 ## Ингредиенты: `ingredients`
@@ -42,9 +49,9 @@
 
 - Название кастомного предмета BreweryX
 
-- ID предмета из Itemsadder - работает только с установленным [IAOraxen Plugin](https://www.spigotmc.org/resources/iaoraxenaddon-breweryx-addon.114778/)
+- ID предмета из Itemsadder (без namespace)
 
-- ID предмета из Oraxen - работает только с установленным  [IAOraxen Plugin](https://www.spigotmc.org/resources/iaoraxenaddon-breweryx-addon.114778/)
+- ID предмета из Oraxen
 
 Формат предмета выглядит вот так - `Предмет/Его количество`
 
@@ -56,6 +63,8 @@
     ingredients:
         - Apple/10 # Тебе нужно 10 яблок
         - Brewery:РазноцветныйНапиток/2 # Тебе нужно 2 РазноцветныхНапитка (из примера выше)
+        - ItemsAdder:SomeItem/1
+        - Oraxen:SomeItem/1
         - blue_flowers/2 # Тебе нужно два кастомных предмета, записанных под blue_flowers
 ```
 

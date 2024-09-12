@@ -11,8 +11,6 @@ import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
 import com.dre.brewery.utility.LegacyUtil;
 import com.github.Anon8281.universalScheduler.UniversalRunnable;
-import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -434,6 +432,12 @@ public class Barrel implements InventoryHolder {
 				}
 			}
 			if (event.willDropItems()) {
+				if (body == null) {
+					BreweryPlugin.getInstance().debugLog("Barrel Body is null, can't drop items: " + this.id);
+					barrels.remove(this);
+					return;
+				}
+
 				byte wood = body.getWood();
 				for (ItemStack item : items) {
 					if (item != null) {
@@ -474,9 +478,14 @@ public class Barrel implements InventoryHolder {
 	 * is this a Small barrel?
 	 */
 	public boolean isSmall() {
+		if (!BreweryPlugin.isFolia()) {
+			return LegacyUtil.isSign(spigot.getType());
+		}
+
+
 		AtomicBoolean type = new AtomicBoolean(false);
-		Bukkit.getRegionScheduler().execute(BreweryPlugin.getInstance(), spigot.getLocation(), () ->
-			type.set(LegacyUtil.isSign(spigot.getType())));
+		BreweryPlugin.getScheduler().runTask(spigot.getLocation(),
+				() -> type.set(LegacyUtil.isSign(spigot.getType())));
 		return type.get();
 	}
 

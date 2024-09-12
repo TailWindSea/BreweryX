@@ -2,7 +2,7 @@
 
 #### BreweryX is an actively maintained fork of Brewery which includes many new features and gives support to the inactive plugin. Find more info below.
 
-Help, feature requests, bug reports? Join our [Discord](https://discord.gg/aV5Am7uxWr)
+### [Wiki & Docs](https://brewery.lumamc.net) **|** [Discord Support](https://discord.gg/aV5Am7uxWr) **|** [Download Brewery**X**](https://www.spigotmc.org/resources/breweryx.114777/)
 
 ---
 
@@ -37,7 +37,8 @@ The somewhat difficult brewing process rewards you with a diversity of Potions, 
 - Full RGB support for 1.16+
 - Multi-puke items
 - Ability to specify custom ingredients by CustomModelData
-- Addons! (Things like **[Recipes](https://www.spigotmc.org/resources/breweryrecipes-breweryx-addon.114897/)** and **[IAOraxenAddon](https://www.spigotmc.org/resources/iaoraxenaddon-breweryx-addon.114778/)**)
+- Addons! (Things like **[Recipes](https://www.spigotmc.org/resources/breweryrecipes-breweryx-addon.114897/)**)
+- Support for ItemsAdder & Oraxen items!
 - Patches like **[this](https://github.com/DieReicheErethons/Brewery/issues/541)**
 - Support for Brewery and BreweryX in our **[discord](https://discord.gg/6VzjPSNRex)**
 - **[Folia](https://github.com/PaperMC/Folia)** support
@@ -69,7 +70,7 @@ The somewhat difficult brewing process rewards you with a diversity of Potions, 
 <dependency>
    <groupId>com.github.Jsinco</groupId>
    <artifactId>BreweryX</artifactId>
-   <version>3.2.1</version>
+   <version>3.2.5</version>
    <scope>provided</scope>
 </dependency>
 ```

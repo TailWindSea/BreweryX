@@ -37,7 +37,11 @@ public class AddonManager extends ClassLoader {
 
 	public void unloadAddons() {
 		for (BreweryAddon addon : addons) {
-			addon.onAddonDisable();
+			try {
+				addon.onAddonDisable();
+			} catch (Throwable t) {
+				plugin.errorLog("Failed to disable addon " + addon.getClass().getSimpleName(), t);
+			}
 		}
 		int loaded = addons.size();
 		if (loaded > 0) plugin.log("Disabled " + loaded + " addon(s)");
@@ -46,7 +50,11 @@ public class AddonManager extends ClassLoader {
 
 	public void reloadAddons() {
 		for (BreweryAddon addon : addons) {
-			addon.onBreweryReload();
+			try {
+				addon.onBreweryReload();
+			} catch (Throwable t) {
+				plugin.errorLog("Failed to reload addon " + addon.getClass().getSimpleName(), t);
+			}
 		}
 		int loaded = addons.size();
 		if (loaded > 0) plugin.log("Reloaded " + loaded + " addon(s)");
@@ -76,9 +84,33 @@ public class AddonManager extends ClassLoader {
 					}
 					Class<? extends BreweryAddon> addonClass = clazz.asSubclass(BreweryAddon.class);
 					try {
-						BreweryAddon addon = addonClass.getConstructor(BreweryPlugin.class, AddonLogger.class).newInstance(plugin, new AddonLogger(addonClass));
-						addon.onAddonEnable(new AddonFileManager(addon, file));
-						addons.add(addon);
+						BreweryAddon addon = addonClass.getConstructor().newInstance();
+						Class<BreweryAddon> breweryAddonClass = BreweryAddon.class;
+						// Set the logger and file manager
+						Field loggerField = breweryAddonClass.getDeclaredField("logger");
+						Field fileManagerField = breweryAddonClass.getDeclaredField("addonFileManager");
+						Field infoField = breweryAddonClass.getDeclaredField("addonInfo");
+
+
+						loggerField.setAccessible(true);
+						fileManagerField.setAccessible(true);
+						infoField.setAccessible(true);
+
+						loggerField.set(addon, new AddonLogger(addonClass));
+						fileManagerField.set(addon, new AddonFileManager(addon, file));
+						infoField.set(addon, addonClass.getAnnotation(AddonInfo.class));
+
+
+						if (addon.getAddonInfo() == null) {
+							plugin.errorLog("Addon " + addonClass.getSimpleName() + " is missing the AddonInfo annotation. It will not be loaded.");
+							continue;
+						}
+
+						// let the addon know it has been enabled
+						addon.getAddonLogger().info("Loading &a" + addon.getAddonInfo().name() + " &f-&a v" + addon.getAddonInfo().version() + " &fby &a" + addon.getAddonInfo().author());
+
+						addons.add(addon); // Add to our list of addons
+						addon.onAddonPreEnable();
 					} catch (Exception e) {
 						plugin.getLogger().log(Level.SEVERE,"Failed to load addon class " + clazz.getSimpleName(), e);
 					}
@@ -88,6 +120,13 @@ public class AddonManager extends ClassLoader {
 			}
 		}
 
+		for (BreweryAddon addon : addons) {
+			try {
+				addon.onAddonEnable();
+			} catch (Throwable t) {
+				plugin.errorLog("Failed to enable addon " + addon.getClass().getSimpleName(), t);
+			}
+		}
 		int loaded = addons.size();
 		if (loaded > 0) plugin.log("Loaded " + loaded + " addon(s)");
 	}

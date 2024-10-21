@@ -20,23 +20,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * A Recipe used to Brew a Brewery Potion.
  */
-public class BRecipe {
+public class BRecipe implements Cloneable {
 
-	private static List<BRecipe> recipes = new ArrayList<>();
+	private static final List<BRecipe> recipes = new ArrayList<>();
 	public static int numConfigRecipes; // The number of recipes in the list that are from config
 
 	// info
 	private String[] name;
 	private boolean saveInData; // If this recipe should be saved in data and loaded again when the server restarts. Applicable to non-config recipes
-	private String optionalID; // ID that might be given by the config
+	private String id; // ID that might be given by the config
 
 	// brewing
 	private List<RecipeItem> ingredients = new ArrayList<>(); // Items and amounts
@@ -61,7 +60,7 @@ public class BRecipe {
 	private String drinkTitle; // Title to show when drinking
 	private boolean glint; // If the potion should have a glint effect
 
-	private BRecipe() {
+	public BRecipe() {
 	}
 
 	/**
@@ -91,7 +90,7 @@ public class BRecipe {
 	@Nullable
 	public static BRecipe fromConfig(ConfigurationSection configSectionRecipes, String recipeId) {
 		BRecipe recipe = new BRecipe();
-		recipe.optionalID = recipeId;
+		recipe.id = recipeId;
 		String nameList = configSectionRecipes.getString(recipeId + ".name");
 		if (nameList != null) {
 			String[] name = nameList.split("/");
@@ -182,9 +181,13 @@ public class BRecipe {
 		} else {
 			ingredientsList = cfg.getStringList(recipeId + ".ingredients");
 		}
-        List<RecipeItem> ingredients = new ArrayList<>(ingredientsList.size());
-		listLoop:
-		for (String item : ingredientsList) {
+		return loadIngredients(ingredientsList, recipeId);
+	}
+
+	public static List<RecipeItem> loadIngredients(List<String> stringList, String recipeId) {
+        List<RecipeItem> ingredients = new ArrayList<>(stringList.size());
+
+		listLoop: for (String item : stringList) {
 			String[] ingredParts = item.split("/");
 			int amount = 1;
 			if (ingredParts.length == 2) {
@@ -239,14 +242,6 @@ public class BRecipe {
 					// Add it as acceptedCustom
 					if (!BCauldronRecipe.acceptedCustom.contains(custom)) {
 						BCauldronRecipe.acceptedCustom.add(custom);
-						/*if (custom instanceof PluginItem || !custom.hasMaterials()) {
-							BCauldronRecipe.acceptedCustom.add(custom);
-						} else if (custom instanceof CustomMatchAnyItem) {
-							CustomMatchAnyItem ma = (CustomMatchAnyItem) custom;
-							if (ma.hasNames() || ma.hasLore()) {
-								BCauldronRecipe.acceptedCustom.add(ma);
-							}
-						}*/
 					}
 					continue listLoop;
 				}
@@ -303,9 +298,17 @@ public class BRecipe {
 	public static List<Tuple<Integer, String>> loadQualityStringList(ConfigurationSection cfg, String path, StringParser.ParseType parseType) {
 		List<String> load = BUtil.loadCfgStringList(cfg, path);
 		if (load != null) {
-			return load.stream().map(line -> StringParser.parseQuality(line, parseType)).collect(Collectors.toList());
+			return loadQualityStringList(load, parseType);
 		}
 		return null;
+	}
+
+	public static List<Tuple<Integer, String>> loadQualityStringList(List<String> stringList, StringParser.ParseType parseType) {
+		List<Tuple<Integer, String>> result = new ArrayList<>();
+		for (String line : stringList) {
+			result.add(StringParser.parseQuality(line, parseType));
+		}
+		return result;
 	}
 
 	/**
@@ -590,8 +593,9 @@ public class BRecipe {
 		return false;
 	}
 
-	public Optional<String> getOptionalID() {
-		return Optional.ofNullable(optionalID);
+
+	public String getId() {
+		return id;
 	}
 
 	public List<RecipeItem> getIngredients() {
@@ -720,6 +724,40 @@ public class BRecipe {
 
 	// Setters
 
+
+	public void setName(String[] name) {
+		this.name = name;
+	}
+
+	public void setCmData(int[] cmData) {
+		this.cmData = cmData;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setDrinkTitle(String drinkTitle) {
+		this.drinkTitle = drinkTitle;
+	}
+
+	public void setPlayercmds(@Nullable List<Tuple<Integer, String>> playercmds) {
+		this.playercmds = playercmds;
+	}
+
+	public void setServercmds(@Nullable List<Tuple<Integer, String>> servercmds) {
+		this.servercmds = servercmds;
+	}
+
+	public void setGlint(boolean glint) {
+		this.glint = glint;
+	}
+
+
+	public void setDrinkMsg(String drinkMsg) {
+		this.drinkMsg = drinkMsg;
+	}
+
 	/**
 	 * When Changing ingredients, Accepted Lists have to be updated in BCauldronRecipe
 	 */
@@ -731,8 +769,8 @@ public class BRecipe {
 		this.cookingTime = cookingTime;
 	}
 
-	public void setDistillruns(byte distillruns) {
-		this.distillruns = distillruns;
+	public void setDistillRuns(byte distillRuns) {
+		this.distillruns = distillRuns;
 	}
 
 	public void setDistillTime(int distillTime) {
@@ -769,13 +807,31 @@ public class BRecipe {
 
 	public void setSaveInData(boolean saveInData) {
 		throw new UnsupportedOperationException();
-		//this.saveInData = saveInData;
 	}
 
 
 	@Override
 	public String toString() {
-		return "BRecipe{" + getRecipeName() + '}';
+		return "BRecipe{" +
+				"name=" + Arrays.toString(name) +
+				", ingredients=" + ingredients +
+				", difficulty=" + difficulty +
+				", cookingTime=" + cookingTime +
+				", distillruns=" + distillruns +
+				", distillTime=" + distillTime +
+				", wood=" + wood +
+				", age=" + age +
+				", color=" + color +
+				", alcohol=" + alcohol +
+				", lore=" + lore +
+				", cmData=" + Arrays.toString(cmData) +
+				", effects=" + effects +
+				", playercmds=" + playercmds +
+				", servercmds=" + servercmds +
+				", drinkMsg='" + drinkMsg + '\'' +
+				", drinkTitle='" + drinkTitle + '\'' +
+				", glint=" + glint +
+				'}';
 	}
 
 	/**
@@ -805,6 +861,18 @@ public class BRecipe {
 		return recipes;
 	}
 
+
+
+	public String[] getName() {
+		return name;
+	}
+
+	public boolean isGlint() {
+		return glint;
+	}
+
+
+
 	/**
 	 * Get the BRecipe that has the given name as one of its quality names.
 	 */
@@ -822,12 +890,23 @@ public class BRecipe {
 			}
 		}
 		for (BRecipe recipe : recipes) {
-			if (recipe.getOptionalID().isPresent() && recipe.getOptionalID().get().equalsIgnoreCase(name)) {
+			if (name.equalsIgnoreCase(recipe.getId())) {
 				return recipe;
 			}
 		}
 		return null;
 	}
+
+	@Nullable
+	public static BRecipe getById(String id) {
+		for (BRecipe recipe : recipes) {
+			if (id.equals(recipe.getId())) {
+				return recipe;
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Get the BRecipe that has that name as its name
@@ -841,6 +920,42 @@ public class BRecipe {
 		}
 		return null;
 	}
+
+    @Override
+    public BRecipe clone() {
+        try {
+            BRecipe clone = (BRecipe) super.clone();
+			clone.name = this.name.clone();
+			clone.ingredients = new ArrayList<>(this.ingredients.size());
+			for (RecipeItem item : this.ingredients) {
+				clone.ingredients.add(item.getMutableCopy());
+			}
+			clone.lore = (this.lore != null) ? new ArrayList<>(this.lore) : null;
+			clone.playercmds = (this.playercmds != null) ? new ArrayList<>(this.playercmds) : null;
+			clone.servercmds = (this.servercmds != null) ? new ArrayList<>(this.servercmds) : null;
+			clone.effects = new ArrayList<>(this.effects.size());
+			for (BEffect effect : this.effects) {
+				clone.effects.add(effect.clone());
+			}
+			clone.cmData = (this.cmData != null) ? this.cmData.clone() : null;
+			clone.drinkMsg = this.drinkMsg;
+			clone.drinkTitle = this.drinkTitle;
+			clone.glint = this.glint;
+			clone.saveInData = this.saveInData;
+			clone.id = this.id;
+			clone.difficulty = this.difficulty;
+			clone.cookingTime = this.cookingTime;
+			clone.distillruns = this.distillruns;
+			clone.distillTime = this.distillTime;
+			clone.wood = this.wood;
+			clone.age = this.age;
+			clone.color = this.color;
+			clone.alcohol = this.alcohol;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 
 	/*public static void saveAddedRecipes(ConfigurationSection cfg) {
 		int i = 0;
@@ -949,7 +1064,7 @@ public class BRecipe {
 		 * Add Commands that are executed by the player on drinking
 		 */
 		public Builder addPlayerCmds(String... cmds) {
-			ArrayList<Tuple<Integer, String>> playercmds = new ArrayList<>(cmds.length);
+			List<Tuple<Integer, String>> playercmds = new ArrayList<>(cmds.length);
 
 			for (String cmd : cmds) {
 				playercmds.add(StringParser.parseQuality(cmd, StringParser.ParseType.CMD));
@@ -966,7 +1081,7 @@ public class BRecipe {
 		 * Add Commands that are executed by the server on drinking
 		 */
 		public Builder addServerCmds(String... cmds) {
-			ArrayList<Tuple<Integer, String>> servercmds = new ArrayList<>(cmds.length);
+			List<Tuple<Integer, String>> servercmds = new ArrayList<>(cmds.length);
 
 			for (String cmd : cmds) {
 				servercmds.add(StringParser.parseQuality(cmd, StringParser.ParseType.CMD));
@@ -1007,7 +1122,7 @@ public class BRecipe {
 		 * Set the Optional ID of this recipe
 		 */
 		public Builder setID(String id) {
-			recipe.optionalID = id;
+			recipe.id = id;
 			return this;
 		}
 
@@ -1030,9 +1145,6 @@ public class BRecipe {
 			}
 			if (recipe.name.length != 1 && recipe.name.length != 3) {
 				throw new IllegalArgumentException("Recipe name neither 1 nor 3");
-			}
-			if (BRecipe.get(recipe.getRecipeName()) != null) {
-				throw new IllegalArgumentException("Recipe with name " + recipe.getRecipeName() + " already exists");
 			}
 			if (recipe.color == null) {
 				throw new IllegalArgumentException("Recipe has no color");

@@ -39,7 +39,7 @@ public class BrewLore {
 	/**
 	 * Write the new lore into the Meta.
 	 * <p>Should be called at the end of operation on this Brew Lore
- 	 */
+	 */
 	public PotionMeta write() {
 		if (lineAddedOrRem) {
 			updateSpacer();
@@ -302,7 +302,7 @@ public class BrewLore {
 
 	/**
 	 * Converts to/from qualitycolored Lore
- 	 */
+	 */
 	public void convertLore(boolean toQuality) {
 		if (!brew.hasRecipe()) {
 			return;
@@ -405,7 +405,7 @@ public class BrewLore {
 
 	/**
 	 * Searches for type and if not found for Substring lore and removes it
- 	 */
+	 */
 	public void removeLore(Type type, String line) {
 		int index = type.findInLore(lore);
 		if (index == -1) {
@@ -419,7 +419,7 @@ public class BrewLore {
 
 	/**
 	 * Searches for type and removes it
- 	 */
+	 */
 	public void removeLore(Type type) {
 		if (type != Type.CUSTOM) {
 			int index = type.findInLore(lore);
@@ -452,7 +452,7 @@ public class BrewLore {
 
 	/**
 	 * Adds the Effect names to the Items description
- 	 */
+	 */
 	public void addOrReplaceEffects(List<BEffect> effects, int quality) {
 		if (BreweryPlugin.getMCVersion().isOrEarlier(MinecraftVersion.V1_9) && effects != null) {
 			for (BEffect effect : effects) {
@@ -475,7 +475,7 @@ public class BrewLore {
 
 	/**
 	 * Removes all effects
- 	 */
+	 */
 	public void removeEffects() {
 		if (meta.hasCustomEffects()) {
 			for (PotionEffect effect : new ArrayList<>(meta.getCustomEffects())) {
@@ -514,8 +514,9 @@ public class BrewLore {
 
 	/**
 	 * True if the PotionMeta has Lore in quality color
- 	 */
+	 */
 	public static boolean hasColorLore(PotionMeta meta) {
+		if (meta == null) return false;
 		if (!meta.hasLore()) return false;
 		List<String> lore = meta.getLore();
 		if (lore.size() < 2) {

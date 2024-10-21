@@ -1,11 +1,9 @@
 package com.dre.brewery.utility;
 
-import com.dre.brewery.BreweryPlugin;
-
 public class StringParser {
 
 	public static Tuple<Integer, String> parseQuality(String line, ParseType type) {
-		line = BreweryPlugin.getInstance().color(line);
+		//line = BreweryPlugin.getInstance().color(line);
 		int plus = 0;
 		if (line.startsWith("+++")) {
 			plus = 3;
@@ -25,10 +23,10 @@ public class StringParser {
 			line = line.substring(1);
 		}
 
-		if (type == ParseType.LORE && !line.startsWith("§")) {
-			line = "§9" + line;
-		}
-		return new Tuple<Integer,String>(plus, line);
+		//if (type == ParseType.LORE && !line.startsWith("§")) {
+		//			line = "§9" + line;
+		//		}
+		return new Tuple<>(plus, line);
 	}
 
 	public enum ParseType {

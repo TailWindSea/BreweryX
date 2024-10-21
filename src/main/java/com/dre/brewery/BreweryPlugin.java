@@ -68,7 +68,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class BreweryPlugin extends JavaPlugin {
 
@@ -161,7 +160,7 @@ public class BreweryPlugin extends JavaPlugin {
         }
 
 		DataManager.loadMiscData(dataManager.getBreweryMiscData());
-        Barrel.getBarrels().addAll(dataManager.getAllBarrels());
+		Barrel.getBarrels().addAll(dataManager.getAllBarrels());
 		// Stream error? - https://gist.github.com/TomLewis/413212bd3df6cb745412475128e01e92w
 		// Apparently there's 2 CraftBlocks trying to be put under the same identifier in the map and it's throwing an err
 		// I'll fix the stream issues in the next version but I have to release this fix ASAP so I'm leaving it like this for now. - Jsinco
@@ -491,17 +490,17 @@ public class BreweryPlugin extends JavaPlugin {
 		public void run() {
 			long start = System.currentTimeMillis();
 			BConfig.reloader = null;
+
             // runs every min to update cooking time
-			Iterator<BCauldron> bCauldronsToRemove = BCauldron.bcauldrons.values().iterator();
-			while (bCauldronsToRemove.hasNext()) {
-				// runs every min to update cooking time
-				BCauldron bCauldron = bCauldronsToRemove.next();
+
+			for (BCauldron bCauldron : BCauldron.bcauldrons.values()) {
 				BreweryPlugin.getScheduler().runTask(bCauldron.getBlock().getLocation(), () -> {
 					if (!bCauldron.onUpdate()) {
-						bCauldronsToRemove.remove();
+						BCauldron.bcauldrons.remove(bCauldron.getBlock());
 					}
 				});
 			}
+
 
 			Barrel.onUpdate();// runs every min to check and update ageing time
 

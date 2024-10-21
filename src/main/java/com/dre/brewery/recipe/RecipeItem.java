@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * <p>They are not necessarily only loaded from config
  * <p>They are immutable if used in a recipe. If one implements Ingredient,
  * it can be used as mutable copy directly in a
- * BIngredients. Otherwise it needs to be converted to an Ingredient
+ * BIngredients. Otherwise, it needs to be converted to an Ingredient
  */
 public abstract class RecipeItem implements Cloneable {
 
@@ -311,5 +311,28 @@ public abstract class RecipeItem implements Cloneable {
 	@Override
 	public String toString() {
 		return "RecipeItem{(" + getClass().getSimpleName() + ") ID: " + getConfigId() + " Materials: " + (hasMaterials() ? getMaterials().size() : 0) + " Amount: " + getAmount();
+	}
+
+	/**
+	 * Converts this RecipeItem to a String that can be used in a config
+	 *
+	 * @return The config String
+	 */
+	public String toConfigString() {
+		String amtAppend = "/" + this.getAmount();
+		if (this instanceof SimpleItem simpleItem) {
+			return simpleItem.getMaterial().toString().toLowerCase() + amtAppend;
+		} else if (this instanceof PluginItem pluginItem) {
+			return pluginItem.getPlugin() + ":" + pluginItem.getItemId() + amtAppend;
+		} else if (this instanceof CustomItem || this instanceof CustomMatchAnyItem) {
+			return this.getConfigId() + amtAppend;
+		} else {
+			throw new IllegalStateException("Unknown RecipeItem Type!");
+		}
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 }
